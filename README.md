@@ -4,7 +4,9 @@
 **Proponente:** Isadora Cristina Ferreira Queiroz  
 **Turma:** 3°B de Informática  
 **Edital:** Simulado com base no Edital nº 03/2026 - Centelha 3 Rondônia (FAPERO / FINEP / CERTI)  
-**Vídeo Pitch:** [https://youtu.be/vBwcouGCj0k](https://youtu.be/vBwcouGCj0k) (Duração máxima: 3 minutos)
+**Vídeo Pitch:** [https://youtu.be/vBwcouGCj0k](https://youtu.be/vBwcouGCj0k) (Duração máxima: 3 minutos)  
+**Repositório GitHub:** [https://github.com/cristinaisadora761-ctrl/FogoZero](https://github.com/cristinaisadora761-ctrl/FogoZero)  
+**Acesso Online (GitHub Pages):** [https://cristinaisadora761-ctrl.github.io/FogoZero/](https://cristinaisadora761-ctrl.github.io/FogoZero/)
 
 ---
 
@@ -17,6 +19,9 @@ Enquanto sistemas consolidados de satélite (como o Programa Queimadas do **INPE
 - Captura coordenadas via **GPS integrado** ou clique no mapa.
 - Avalia severidade da fumaça e proximidade de casas e escolas.
 - Apresenta os focos em um **mapa interativo em tempo real** e em um painel estatístico com dados históricos oficiais.
+- Permite **pesquisar e filtrar ocorrências** em tempo real por bairro, cidade e status.
+- Disponibiliza **exportação de dados em CSV e JSON** para relatórios e apoio à Defesa Civil e secretarias de meio ambiente.
+- Menu responsivo adaptado para dispositivos móveis e celulares.
 - Disponibiliza orientações de **saúde e prevenção respiratória** e canais diretos de emergência (193 Bombeiros, 199 Defesa Civil, SEDAM RO).
 
 ---
@@ -28,7 +33,9 @@ Enquanto sistemas consolidados de satélite (como o Programa Queimadas do **INPE
    - Apresentação completa e Hero interativo com indicadores rápidos.
    - Formulário de Registro Cidadão com validação, geolocalização e preview de fotografia.
    - Mapa Interativo de Rondônia construído com **Leaflet.js** e marcadores com animação de pulso por gravidade.
-   - Feed dinâmico de últimos relatos armazenados em `localStorage`.
+   - Feed dinâmico com campo de busca em tempo real e filtros de status.
+   - Botões de exportação de dados em planilhas **CSV** e **JSON**.
+   - Menu hambúrguer responsivo para navegação em smartphones.
    - Painel de Estatísticas com **Chart.js** (dados INPE: Junho 2024 vs 2025; redução de 79,2% em Porto Velho).
    - Seção do Vídeo Pitch incorporado do YouTube e tabela do roteiro de 3 minutos.
    - Dossiê detalhado dos 5 pilares do Programa Centelha 3.
@@ -41,18 +48,22 @@ Enquanto sistemas consolidados de satélite (como o Programa Queimadas do **INPE
    Estilos customizados, tema escuro verde-floresta com destaques em fogo/âmbar, efeitos de vidro (glassmorphism), animações de pulso nos marcadores do mapa e formatações de impressão.
 
 4. **`app.js`**:  
-   Lógica JavaScript da aplicação: controle do mapa Leaflet, filtros por intensidade e cidade, geolocalização HTML5, geração de protocolo único, persistência em `localStorage`, gráficos Chart.js e alertas interativos.
+   Lógica JavaScript da aplicação: controle do mapa Leaflet, filtros por intensidade e cidade, geolocalização HTML5, geração de protocolo único, persistência em `localStorage`, exportação de dados, busca em tempo real, gráficos Chart.js e alertas interativos.
 
 ---
 
 ## 💻 Como Abrir e Utilizar
 
-Você pode abrir o site de duas maneiras muito simples:
+Você pode abrir o site de três maneiras:
 
-### Opção 1: Abrir diretamente no navegador (Chrome, Edge, Firefox)
+### Opção 1: Acessar online via GitHub Pages
+Acesse diretamente pelo navegador no link:  
+👉 **[https://cristinaisadora761-ctrl.github.io/FogoZero/](https://cristinaisadora761-ctrl.github.io/FogoZero/)**
+
+### Opção 2: Abrir diretamente no navegador local
 Basta clicar duas vezes no arquivo `index.html` ou arrastá-lo para a janela do seu navegador!
 
-### Opção 2: Servidor local com Python
+### Opção 3: Servidor local com Python
 Se desejar executar com um servidor HTTP local:
 ```powershell
 cd C:\Users\Aluno\.gemini\antigravity\scratch\fogozero
