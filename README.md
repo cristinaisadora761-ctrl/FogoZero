@@ -26,50 +26,68 @@ Enquanto sistemas consolidados de satélite (como o Programa Queimadas do **INPE
 
 ---
 
-## 🚀 Estrutura dos Arquivos
+## 🚀 Estrutura dos Arquivos do Repositório
 
-1. **`index.html`**:  
-   Aplicação web principal responsiva, contendo:
-   - Apresentação completa e Hero interativo com indicadores rápidos.
-   - Formulário de Registro Cidadão com validação, geolocalização e preview de fotografia.
-   - Mapa Interativo de Rondônia construído com **Leaflet.js** e marcadores com animação de pulso por gravidade.
-   - Feed dinâmico com campo de busca em tempo real e filtros de status.
-   - Botões de exportação de dados em planilhas **CSV** e **JSON**.
-   - Menu hambúrguer responsivo para navegação em smartphones.
-   - Painel de Estatísticas com **Chart.js** (dados INPE: Junho 2024 vs 2025; redução de 79,2% em Porto Velho).
-   - Seção do Vídeo Pitch incorporado do YouTube e tabela do roteiro de 3 minutos.
-   - Dossiê detalhado dos 5 pilares do Programa Centelha 3.
-   - Guia de Saúde e contatos de emergência (Bombeiros 193, Defesa Civil 199, SEDAM, PM Ambiental).
+1. **`spec.md`**:  
+   **Especificação Técnica Completa e Final do Sistema**, contendo objetivos, perfis de usuários, casos de uso, requisitos funcionais e não-funcionais, modelo de dados em tabela, critérios de aceite, decisão de stack e a seção completa de **Instalação e Execução** (ambiente, banco de dados, variáveis de ambiente, passo a passo numerado e como testar com usuários de teste).
 
-2. **`formulario.html`**:  
-   Visualização formatada e limpa do **Formulário Individual do Estudante (Fase 1)** com todas as 17 respostas organizadas, fontes citadas, roteiro de pitch e critérios de avaliação com fórmula de nota. Otimizado para impressão direta em PDF ou cópia de texto para entrega em `.doc`.
+2. **`CHANGELOG.md`**:  
+   Registro detalhado de decisões, correções técnicas (ex.: ajuste de rotas do Express 5) e comprovação de **revisão humana** do código proposto pela IA, além da checagem do Checklist de Segurança (Anexo B).
 
-3. **`styles.css`**:  
-   Estilos customizados, tema escuro verde-floresta com destaques em fogo/âmbar, efeitos de vidro (glassmorphism), animações de pulso nos marcadores do mapa e formatações de impressão.
+3. **`database/schema.sql`**:  
+   Script SQL padronizado para criação das tabelas (`municipios`, `usuarios`, `relatos_queimadas`) e inserção de dados iniciais (*seeds*) para testes imediatos.
 
-4. **`app.js`**:  
-   Lógica JavaScript da aplicação: controle do mapa Leaflet, filtros por intensidade e cidade, geolocalização HTML5, geração de protocolo único, persistência em `localStorage`, exportação de dados, busca em tempo real, gráficos Chart.js e alertas interativos.
+4. **`server.js`**:  
+   Servidor backend Node.js com Express e SQLite 3 nativo (`node:sqlite`), contendo API REST com consultas parametrizadas (*Prepared Statements*) e autenticação segura com hash SHA-256.
+
+5. **`package.json`**:  
+   Gerenciador de dependências (`express`, `cors`, `dotenv`) e scripts de inicialização (`npm start`, `npm run dev`, `npm run db:seed`).
+
+6. **`.env.example`** & **`.gitignore`**:  
+   Modelo de variáveis de ambiente e exclusão de credenciais sensíveis e arquivos binários do versionamento Git.
+
+7. **`index.html`**:  
+   Aplicação web principal responsiva (SPA), integrada à API REST e ao banco de dados, com mapa Leaflet, gráficos Chart.js, formulário com GPS e modal de autenticação.
+
+8. **`formulario.html`**:  
+   Dossiê completo das 17 respostas oficiais do Simulado Centelha 3 Rondônia, formatado para impressão ou exportação em PDF/Word (.doc).
+
+9. **`styles.css`** & **`app.js`**:  
+   Estilos visuais temáticos e lógica frontend cliente (com sincronização via API e fallback automático para LocalStorage).
 
 ---
 
-## 💻 Como Abrir e Utilizar
+## 💻 Como Instalar e Rodar Localmente (Guia Rápido)
 
-Você pode abrir o site de três maneiras:
+Para rodar o sistema com backend Node.js e banco de dados SQLite:
 
-### Opção 1: Acessar online via GitHub Pages
-Acesse diretamente pelo navegador no link:  
-👉 **[https://cristinaisadora761-ctrl.github.io/FogoZero/](https://cristinaisadora761-ctrl.github.io/FogoZero/)**
+```bash
+# 1. Clonar o repositório
+git clone https://github.com/cristinaisadora761-ctrl/FogoZero.git
+cd FogoZero
 
-### Opção 2: Abrir diretamente no navegador local
-Basta clicar duas vezes no arquivo `index.html` ou arrastá-lo para a janela do seu navegador!
+# 2. Instalar dependências
+npm install
 
-### Opção 3: Servidor local com Python
-Se desejar executar com um servidor HTTP local:
-```powershell
-cd C:\Users\Aluno\.gemini\antigravity\scratch\fogozero
-python -m http.server 3000
+# 3. Criar arquivo de configuração
+cp .env.example .env   # No Windows PowerShell: Copy-Item .env.example .env
+
+# 4. Iniciar o servidor (o banco é inicializado automaticamente)
+npm start
 ```
-Em seguida, acesse no navegador: `http://localhost:3000`
+Acesse no navegador: **`http://localhost:3000`**
+
+### Usuários de Teste:
+- **Professor / Admin:** `professor@fogozero.org` | Senha: `admin123`
+- **Agente Defesa Civil:** `agente@defesacivil.ro.gov.br` | Senha: `admin123`
+- **Cidadão Comum:** `isadora@estudante.ro.gov.br` | Senha: `teste123`
+
+---
+
+## 🌐 Acesso Online (Sem Instalação)
+
+O sistema também está publicado e acessível publicamente via GitHub Pages:  
+👉 **[https://cristinaisadora761-ctrl.github.io/FogoZero/](https://cristinaisadora761-ctrl.github.io/FogoZero/)**
 
 ---
 
