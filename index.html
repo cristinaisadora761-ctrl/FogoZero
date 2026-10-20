@@ -86,6 +86,13 @@
         <a href="formulario.html" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 hover:bg-emerald-900/90 transition-colors">
           <span>📄</span> Formulário Completo (.doc)
         </a>
+        <!-- Status de Usuário / Botão de Login -->
+        <div id="user-status-container" class="flex items-center">
+          <button id="btn-abrir-login" onclick="abrirModalLogin()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 hover:bg-emerald-900/90 transition-colors">
+            <span>🔐</span> Entrar
+          </button>
+        </div>
+
         <a href="#registro" class="btn-fire inline-flex items-center gap-1.5 px-4 py-2 text-xs md:text-sm font-bold rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-600/30">
           <span>🚨</span> Registrar Foco
         </a>
@@ -1012,6 +1019,40 @@
           </button>
         </div>
       </div>
+    </div>
+  <!-- ================= MODAL DE LOGIN (AUTENTICAÇÃO) ================= -->
+  <div id="modal-login" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-sm w-full p-6 rounded-2xl border border-emerald-700/60 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-3 border-b border-gray-800 mb-4">
+        <h3 class="font-bold text-white text-base flex items-center gap-2">
+          <span>🔐</span> Acesso ao FogoZero
+        </h3>
+        <button onclick="fecharModalLogin()" class="text-gray-400 hover:text-white text-sm">✕</button>
+      </div>
+
+      <form id="form-login" onsubmit="realizarLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">E-mail</label>
+          <input type="email" id="loginEmail" required value="professor@fogozero.org" class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-1">Senha</label>
+          <input type="password" id="loginSenha" required value="admin123" class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-900/60 text-[11px] text-gray-300 space-y-1">
+          <p class="font-semibold text-emerald-400">💡 Credenciais de Teste da Spec:</p>
+          <p>• <strong>Professor / Admin:</strong> professor@fogozero.org / admin123</p>
+          <p>• <strong>Agente Defesa Civil:</strong> agente@defesacivil.ro.gov.br / admin123</p>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-lg">
+            Entrar no Painel
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

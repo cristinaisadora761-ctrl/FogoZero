@@ -1,0 +1,27 @@
+{
+  "name": "fogozero",
+  "version": "1.0.0",
+  "description": "**Projeto Acadêmico – Simulado Programa Centelha 3 Rondônia (Fase 1 - Ideias Inovadoras)**   **Proponente:** Isadora Cristina Ferreira Queiroz   **Turma:** 3°B de Informática   **Edital:** Simulado com base no Edital nº 03/2026 - Centelha 3 Rondônia (FAPERO / FINEP / CERTI)   **Vídeo Pitch:** [https://youtu.be/vBwcouGCj0k](https://youtu.be/vBwcouGCj0k) (Duração máxima: 3 minutos)   **Repositório GitHub:** [https://github.com/cristinaisadora761-ctrl/FogoZero](https://github.com/cristinaisadora761-ctrl/FogoZero)   **Acesso Online (GitHub Pages):** [https://cristinaisadora761-ctrl.github.io/FogoZero/](https://cristinaisadora761-ctrl.github.io/FogoZero/)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "db:seed": "node -e \"const fs=require('fs'),{DatabaseSync}=require('node:sqlite'),db=new DatabaseSync('database/fogozero.db');db.exec(fs.readFileSync('database/schema.sql','utf8'));console.log('Banco de dados inicializado com sucesso!');\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cristinaisadora761-ctrl/FogoZero.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cristinaisadora761-ctrl/FogoZero/issues"
+  },
+  "homepage": "https://github.com/cristinaisadora761-ctrl/FogoZero#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0"
+  }
+}

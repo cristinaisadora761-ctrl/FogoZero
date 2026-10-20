@@ -123,8 +123,28 @@ document.addEventListener("DOMContentLoaded", () => {
   preencherDataHoraPadrao();
 });
 
-// Carrega dados do LocalStorage ou padrão
-function carregarRelatos() {
+// Carrega dados da API Backend (SQLite) com fallback automático para LocalStorage (GitHub Pages)
+async function carregarRelatos() {
+  try {
+    const res = await fetch("/api/relatos");
+    if (res.ok) {
+      const dados = await res.json();
+      if (Array.isArray(dados) && dados.length > 0) {
+        currentReports = dados;
+        salvarRelatos();
+        renderizarRelatosNoMapa();
+        renderizarFeedRelatos();
+        atualizarContadores();
+        atualizarGraficoCategorias();
+        return;
+      }
+    }
+  } catch (err) {
+    // Modo estático (ex.: GitHub Pages) ou sem servidor rodando: utiliza LocalStorage
+    console.info("FogoZero em modo estático/offline. Utilizando armazenamento local.");
+  }
+
+  // Fallback padrão para LocalStorage
   const salvas = localStorage.getItem("fogozero_relatos");
   if (salvas) {
     try {
@@ -452,7 +472,23 @@ function configurarEventosFormulario() {
       foto: previewImg ? previewImg.src : null
     };
 
-    // Insere no início da lista
+    // Tenta persistir no Banco de Dados via API REST
+    fetch("/api/relatos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(novoRelato)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.protocolo) {
+        novoRelato.protocolo = data.protocolo;
+      }
+    })
+    .catch(() => {
+      // Falha silenciosa para fallback local
+    });
+
+    // Insere no início da lista local
     currentReports.unshift(novoRelato);
     salvarRelatos();
 
@@ -739,3 +775,89 @@ window.exportarRelatosJSON = function() {
   document.body.removeChild(link);
   showToast("Base de dados JSON exportada com sucesso!", "success");
 };
+
+// ====================================================================
+// AUTENTICAÇÃO E CONTROLE DE ACESSO (Spec: Login Funcional)
+// ====================================================================
+
+window.abrirModalLogin = function() {
+  const modal = document.getElementById("modal-login");
+  if (modal) modal.classList.remove("hidden");
+};
+
+window.fecharModalLogin = function() {
+  const modal = document.getElementById("modal-login");
+  if (modal) modal.classList.add("hidden");
+};
+
+window.realizarLogin = async function(e) {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value.trim();
+  const senha = document.getElementById("loginSenha").value;
+
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, senha })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.sucesso) {
+      localStorage.setItem("fogozero_usuario", JSON.stringify(data.usuario));
+      atualizarInterfaceUsuario(data.usuario);
+      fecharModalLogin();
+      showToast(`Bem-vindo, ${data.usuario.nome}! Perfil: ${data.usuario.perfil.toUpperCase()}`, "success");
+    } else {
+      showToast(data.erro || "Falha na autenticação.", "error");
+    }
+  } catch (err) {
+    // Simulação local em caso de uso estático
+    if (email === "professor@fogozero.org" && senha === "admin123") {
+      const usuarioSimulado = { id: 1, nome: "Professor Avaliador", email, perfil: "admin" };
+      localStorage.setItem("fogozero_usuario", JSON.stringify(usuarioSimulado));
+      atualizarInterfaceUsuario(usuarioSimulado);
+      fecharModalLogin();
+      showToast("Autenticado como Professor Avaliador (Admin)!", "success");
+    } else {
+      showToast("Credenciais incorretas. Use professor@fogozero.org / admin123", "error");
+    }
+  }
+};
+
+window.fazerLogout = function() {
+  localStorage.removeItem("fogozero_usuario");
+  const container = document.getElementById("user-status-container");
+  if (container) {
+    container.innerHTML = `
+      <button id="btn-abrir-login" onclick="abrirModalLogin()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 hover:bg-emerald-900/90 transition-colors">
+        <span>🔐</span> Entrar
+      </button>
+    `;
+  }
+  showToast("Sessão encerrada com sucesso.", "info");
+};
+
+function atualizarInterfaceUsuario(usuario) {
+  const container = document.getElementById("user-status-container");
+  if (!container || !usuario) return;
+
+  container.innerHTML = `
+    <div class="flex items-center gap-2 bg-emerald-950/90 border border-emerald-600/60 px-3 py-1 rounded-xl text-xs">
+      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span class="text-white font-medium text-[11px]">${usuario.nome.split(" ")[0]} (${usuario.perfil.toUpperCase()})</span>
+      <button onclick="fazerLogout()" class="text-red-400 hover:text-red-300 ml-1 text-xs" title="Sair">🚪</button>
+    </div>
+  `;
+}
+
+// Checagem de sessão salva ao carregar
+document.addEventListener("DOMContentLoaded", () => {
+  const salvo = localStorage.getItem("fogozero_usuario");
+  if (salvo) {
+    try {
+      atualizarInterfaceUsuario(JSON.parse(salvo));
+    } catch (e) {}
+  }
+});
+
