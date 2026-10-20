@@ -1,0 +1,226 @@
+/* FogoZero - Estilos Customizados & Animações */
+:root {
+  --primary: #15803d; /* verde floresta preservada */
+  --primary-hover: #166534;
+  --accent-fire: #ea580c; /* fogo alerta */
+  --accent-amber: #f59e0b;
+  --danger: #dc2626;
+  --dark-bg: #0b1311;
+  --card-bg: #13221e;
+  --border-color: #233b35;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #09100e;
+}
+::-webkit-scrollbar-thumb {
+  background: #1c3831;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a554a;
+}
+
+/* Efeito de brilho de fogo sutil no Hero */
+.fire-glow {
+  text-shadow: 0 0 20px rgba(234, 88, 12, 0.4), 0 0 40px rgba(245, 158, 11, 0.2);
+}
+
+.emerald-glow {
+  text-shadow: 0 0 25px rgba(16, 185, 129, 0.35);
+}
+
+.bg-radial-gradient {
+  background: radial-gradient(circle at 50% 20%, rgba(234, 88, 12, 0.12) 0%, rgba(13, 148, 136, 0.08) 45%, rgba(11, 19, 17, 1) 90%);
+}
+
+/* Animação de pulso para marcadores de foco no mapa */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  80%, 100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+.pulsing-marker {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.pulsing-marker::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  animation: pulse-ring 1.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+  background-color: inherit;
+  pointer-events: none;
+}
+
+.marker-critico {
+  background-color: #dc2626;
+  border: 2px solid #fee2e2;
+}
+.marker-densa {
+  background-color: #ea580c;
+  border: 2px solid #ffedd5;
+}
+.marker-moderada {
+  background-color: #eab308;
+  border: 2px solid #fef9c3;
+}
+.marker-leve {
+  background-color: #10b981;
+  border: 2px solid #d1fae5;
+}
+
+/* Leaflet Container Personalizado */
+#map {
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  border-radius: 0.75rem;
+  z-index: 10;
+}
+
+.leaflet-popup-content-wrapper {
+  background: #0f1c18 !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #233b35 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+.leaflet-popup-tip {
+  background: #0f1c18 !important;
+}
+
+.leaflet-popup-content {
+  margin: 14px 16px !important;
+  line-height: 1.4 !important;
+}
+
+/* Glassmorphism cards */
+.glass-panel {
+  background: rgba(18, 32, 28, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(43, 76, 68, 0.45);
+}
+
+.glass-panel:hover {
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+.glass-card-accent {
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+  border: 1px solid rgba(234, 88, 12, 0.25);
+}
+
+/* Badge estilizado */
+.badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Botões com microinterações */
+.btn-primary {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(22, 163, 74, 0.4);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-fire {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-fire:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -5px rgba(234, 88, 12, 0.45);
+}
+.btn-fire:active {
+  transform: translateY(0);
+}
+
+/* Toasts */
+#toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.toast-item {
+  pointer-events: auto;
+  animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Impressão otimizada para o relatório do projeto */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+  nav, footer, #toast-container, .no-print {
+    display: none !important;
+  }
+  .glass-panel {
+    border: 1px solid #d1d5db !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+}

@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FogoZero | Sistema Inteligente de Registro e Monitoramento de Queimadas</title>
+  <meta name="description" content="FogoZero - Plataforma comunitária inteligente para registro, geolocalização e monitoramento de queimadas em Rondônia. Projeto Centelha 3 - Isadora Cristina Ferreira Queiroz.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            forest: {
+              800: '#0f291e',
+              900: '#091a13',
+              950: '#05100b'
+            },
+            fire: {
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Google Fonts Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Estilos Customizados -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="bg-[#0b1311] text-slate-100 min-h-screen antialiased flex flex-col selection:bg-orange-500 selection:text-white">
+
+  <!-- ================= NAVBAR ================= -->
+  <nav class="sticky top-0 z-50 glass-panel border-b border-emerald-950/60 shadow-lg px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#inicio" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-emerald-600 flex items-center justify-center text-white text-xl shadow-md shadow-orange-500/20 group-hover:scale-105 transition-transform">
+          🔥
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-orange-400 via-amber-300 to-emerald-400 bg-clip-text text-transparent">
+              FogoZero
+            </span>
+            <span class="text-[10px] font-semibold bg-emerald-900/60 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded-full">
+              Centelha 3 RO
+            </span>
+          </div>
+          <p class="text-[11px] text-gray-400 hidden sm:block">Monitoramento Inteligente de Queimadas</p>
+        </div>
+      </a>
+
+      <!-- Menu Links Desktop -->
+      <div class="hidden md:flex items-center gap-6 text-sm font-medium text-gray-300">
+        <a href="#inicio" class="hover:text-emerald-400 transition-colors">Início</a>
+        <a href="#registro" class="hover:text-orange-400 transition-colors">Registrar Foco</a>
+        <a href="#mapa" class="hover:text-emerald-400 transition-colors">Mapa de Rondônia</a>
+        <a href="#estatisticas" class="hover:text-emerald-400 transition-colors">Dados & INPE</a>
+        <a href="#pitch" class="hover:text-orange-400 transition-colors">Vídeo Pitch</a>
+        <a href="#projeto" class="hover:text-emerald-400 transition-colors">Sobre a Proposta</a>
+        <a href="#prevencao" class="hover:text-emerald-400 transition-colors">Prevenção</a>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2.5">
+        <a href="formulario.html" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 hover:bg-emerald-900/90 transition-colors">
+          <span>📄</span> Formulário Completo (.doc)
+        </a>
+        <a href="#registro" class="btn-fire inline-flex items-center gap-1.5 px-4 py-2 text-xs md:text-sm font-bold rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg shadow-orange-600/30">
+          <span>🚨</span> Registrar Foco
+        </a>
+
+        <!-- Botão Menu Mobile -->
+        <button id="btn-mobile-menu" onclick="toggleMenuMobile()" class="md:hidden p-2 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 hover:text-white" aria-label="Abrir Menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Menu Mobile Dropdown -->
+    <div id="mobile-menu-drawer" class="hidden md:hidden pt-4 pb-2 border-t border-emerald-900/60 mt-3 space-y-2 text-sm font-medium">
+      <a href="#inicio" onclick="toggleMenuMobile()" class="block px-3 py-2 rounded-lg hover:bg-emerald-950/60 text-gray-200 hover:text-emerald-400">Início</a>
+      <a href="#registro" onclick="toggleMenuMobile()" class="block px-3 py-2 rounded-lg hover:bg-emerald-950/60 text-orange-400 font-semibold">🚨 Registrar Foco</a>
+      <a href="#mapa" onclick="toggleMenuMobile()" class="block px-3 py-2 rounded-lg hover:bg-emerald-950/60 text-gray-200 hover:text-emerald-400">🗺️ Mapa de Rondônia</a>
+      <a href="#estatisticas" onclick="toggleMenuMobile()" class="block px-3 py-2 rounded-lg hover:bg-emerald-950/60 text-gray-200 hover:text-emerald-400">📊 Dados & INPE</a>
+      <a href="#pitch" onclick="toggleMenuMobile()" class="block px-3 py-2 rounded-lg hover:bg-emerald-950/60 text-gray-200 hover:text-orange-400">🎬 Vídeo Pitch</a>
+      <a href="#projeto" onclick="toggleMenuMobile()" class="block px-3 py-2 rounded-lg hover:bg-emerald-950/60 text-gray-200 hover:text-emerald-400">📋 Sobre a Proposta</a>
+      <a href="#prevencao" onclick="toggleMenuMobile()" class="block px-3 py-2 rounded-lg hover:bg-emerald-950/60 text-gray-200 hover:text-emerald-400">🩺 Prevenção & Saúde</a>
+      <a href="formulario.html" target="_blank" class="block px-3 py-2 rounded-lg bg-emerald-900/40 text-emerald-300 font-semibold border border-emerald-700/50 mt-2">📄 Formulário Completo (.doc)</a>
+    </div>
+  </nav>
+
+  <!-- ================= HERO SECTION ================= -->
+  <section id="inicio" class="relative overflow-hidden pt-12 pb-16 lg:py-24 bg-radial-gradient border-b border-emerald-950/60">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8 relative z-10">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <!-- Text Hero -->
+        <div class="lg:col-span-7 space-y-6 text-left">
+          
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-950/60 border border-orange-700/50 text-orange-300 text-xs font-semibold">
+            <span class="flex h-2 w-2 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+            </span>
+            Simulado Centelha 3 Rondônia • Fase 1 (Ideias Inovadoras)
+          </div>
+
+          <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
+            FogoZero: Registro e Monitoramento <span class="bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent fire-glow">Inteligente de Queimadas</span>
+          </h1>
+
+          <p class="text-base sm:text-lg text-gray-300 font-normal leading-relaxed max-w-2xl">
+            Uma solução digital pioneira que une a participação ativa da população, dados georreferenciados e tecnologia web para identificar, mapear e combater focos de fogo em Rondônia, complementando os sistemas de satélite e protegendo a saúde coletiva.
+          </p>
+
+          <!-- Autora e Turma Tag -->
+          <div class="p-3.5 rounded-xl bg-emerald-950/50 border border-emerald-800/40 flex flex-wrap items-center gap-4 text-xs text-emerald-200">
+            <div class="flex items-center gap-2">
+              <span class="p-1 rounded bg-emerald-800/60">👩‍💻</span>
+              <span><strong>Proponente:</strong> Isadora Cristina Ferreira Queiroz</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="p-1 rounded bg-emerald-800/60">🎓</span>
+              <span><strong>Turma:</strong> 3°B de Informática</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="p-1 rounded bg-emerald-800/60">📍</span>
+              <span>Rondônia - Brasil</span>
+            </div>
+          </div>
+
+          <!-- Hero CTAs -->
+          <div class="flex flex-wrap gap-3.5 pt-2">
+            <a href="#registro" class="btn-fire px-6 py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-sm shadow-xl shadow-orange-600/30 flex items-center gap-2">
+              <span>🔥</span> Fazer Registro de Foco
+            </a>
+            <a href="#mapa" class="btn-primary px-6 py-3 rounded-xl bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 border border-emerald-700/60 font-semibold text-sm flex items-center gap-2">
+              <span>🗺️</span> Ver Mapa em Tempo Real
+            </a>
+            <a href="#pitch" class="px-5 py-3 rounded-xl bg-gray-900/80 hover:bg-gray-800 text-gray-300 border border-gray-700 font-medium text-sm flex items-center gap-2">
+              <span>🎬</span> Assistir Pitch (3 min)
+            </a>
+          </div>
+
+        </div>
+
+        <!-- Hero Card / Quick Indicators -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass-panel p-6 rounded-2xl border border-emerald-800/50 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-orange-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+              <div class="flex items-center gap-2">
+                <span class="text-orange-400 text-lg">📊</span>
+                <h3 class="font-bold text-white text-sm">Painel Rápido de Rondônia</h3>
+              </div>
+              <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-2 py-0.5 rounded">
+                Dados Oficiais & Comunidade
+              </span>
+            </div>
+
+            <!-- Grid de Indicadores -->
+            <div class="grid grid-cols-2 gap-3.5 my-5">
+              <div class="p-3.5 rounded-xl bg-black/40 border border-gray-800/80">
+                <p class="text-xs text-gray-400">Focos na Comunidade</p>
+                <p id="counter-total-relatos" class="text-2xl font-black text-amber-400 mt-1">6</p>
+                <p class="text-[10px] text-gray-500 mt-0.5">Relatados no FogoZero</p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-black/40 border border-gray-800/80">
+                <p class="text-xs text-gray-400">Focos Críticos / Densos</p>
+                <p id="counter-criticos" class="text-2xl font-black text-red-400 mt-1">3</p>
+                <p class="text-[10px] text-gray-500 mt-0.5">Alta emissão de fumaça</p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-black/40 border border-gray-800/80">
+                <p class="text-xs text-gray-400">Queda em Porto Velho</p>
+                <p class="text-2xl font-black text-emerald-400 mt-1">-79,2%</p>
+                <p class="text-[10px] text-gray-500 mt-0.5">22 focos em 2026 vs 106 em 2025</p>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-black/40 border border-gray-800/80">
+                <p class="text-xs text-gray-400">Rondônia (Junho/INPE)</p>
+                <p class="text-2xl font-black text-blue-400 mt-1">49 focos</p>
+                <p class="text-[10px] text-gray-500 mt-0.5">Comparado a 183 no ano ant.</p>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-emerald-950/40 border border-emerald-900/60 text-xs text-gray-300 flex items-start gap-2.5">
+              <span class="text-base text-emerald-400">💡</span>
+              <p>
+                <strong>Diferencial FogoZero:</strong> Enquanto satélites detectam apenas grandes fontes térmicas globais, moradores informam fumaça urbana, terrenos e queima de lixo em tempo real.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FORMULÁRIO DE REGISTRO DE QUEIMADA ================= -->
+  <section id="registro" class="py-16 bg-[#0c1613] border-b border-emerald-950/60">
+    <div class="max-w-5xl mx-auto px-4 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="badge-tag bg-orange-950/80 text-orange-400 border border-orange-700/60 mb-2">
+          🚨 Registro Cidadão Colaborativo
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Registrar Ocorrência de Queimada
+        </h2>
+        <p class="text-sm text-gray-400 mt-2">
+          Preencha as informações observadas no seu bairro ou comunidade. Seus dados ajudam a alimentar o mapa de monitoramento e direcionar alertas preventivos.
+        </p>
+      </div>
+
+      <!-- Alerta Crítico de Segurança (Exigência do Formulario Centelha) -->
+      <div class="mb-8 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-red-950/70 via-orange-950/50 to-red-950/70 border-2 border-red-700/60 shadow-xl flex items-start gap-3.5">
+        <div class="text-2xl sm:text-3xl p-2 rounded-xl bg-red-900/50 text-red-300">
+          ⚠️
+        </div>
+        <div>
+          <h4 class="font-bold text-red-200 text-sm sm:text-base flex items-center gap-2">
+            AVISO DE SEGURANÇA E PROTEÇÃO À VIDA
+          </h4>
+          <p class="text-xs sm:text-sm text-red-300/90 mt-1 leading-relaxed">
+            <strong>Nunca se aproxime de chamas, fumaça densa ou áreas de risco para fotografar ou preencher este formulário.</strong> Sua segurança e integridade física são a prioridade absoluta. Faça o relato apenas a partir de distâncias seguras. Em caso de emergência com risco a vidas ou residências, ligue imediatamente para o <strong>Corpo de Bombeiros (193)</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Card do Formulário -->
+      <div class="glass-panel p-6 sm:p-8 rounded-2xl border border-emerald-900/60 shadow-2xl">
+        <form id="report-form" class="space-y-6">
+
+          <!-- Linha 1: Município e Bairro -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label for="municipioSelect" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+                Município de Rondônia *
+              </label>
+              <select id="municipioSelect" required class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors">
+                <option value="Porto Velho">Porto Velho</option>
+                <option value="Ariquemes">Ariquemes</option>
+                <option value="Ji-Paraná">Ji-Paraná</option>
+                <option value="Cacoal">Cacoal</option>
+                <option value="Vilhena">Vilhena</option>
+                <option value="Jaru">Jaru</option>
+                <option value="Rolim de Moura">Rolim de Moura</option>
+                <option value="Guajará-Mirim">Guajará-Mirim</option>
+                <option value="Ouro Preto do Oeste">Ouro Preto do Oeste</option>
+                <option value="Candeias do Jamari">Candeias do Jamari</option>
+                <option value="Outro Município de RO">Outro Município de Rondônia</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="bairroInput" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+                Bairro / Ponto de Referência *
+              </label>
+              <input type="text" id="bairroInput" required placeholder="Ex: Bairro São Cristóvão, próximo à praça" class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors">
+            </div>
+          </div>
+
+          <!-- Linha 2: Geolocalização GPS & Captura no Mapa -->
+          <div class="p-4 rounded-xl bg-black/40 border border-gray-800 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <label class="text-xs font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <span>📍</span> Coordenadas Geográficas (Geolocalização)
+              </label>
+              <button type="button" id="btn-obter-gps" class="text-xs px-3 py-1.5 rounded-lg bg-emerald-900/80 hover:bg-emerald-800 text-emerald-200 border border-emerald-700/60 font-medium transition-colors flex items-center gap-1">
+                <span>📡</span> Usar Minha Localização Atual (GPS)
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <span class="text-[11px] text-gray-400 block mb-1">Latitude</span>
+                <input type="text" id="coordLat" value="-8.7619" placeholder="-8.7619" class="w-full bg-[#08110e] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white font-mono focus:border-emerald-500">
+              </div>
+              <div>
+                <span class="text-[11px] text-gray-400 block mb-1">Longitude</span>
+                <input type="text" id="coordLng" value="-63.9039" placeholder="-63.9039" class="w-full bg-[#08110e] border border-gray-700 rounded-lg px-3 py-2 text-xs text-white font-mono focus:border-emerald-500">
+              </div>
+            </div>
+            <p class="text-[11px] text-gray-500 italic">
+              💡 Dica: Você também pode clicar em qualquer ponto do mapa interativo abaixo para capturar as coordenadas exatas automaticamente!
+            </p>
+          </div>
+
+          <!-- Linha 3: Tipo de Queimada e Intensidade da Fumaça -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div>
+              <label for="tipoQueimadaSelect" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+                Tipo de Queimada *
+              </label>
+              <select id="tipoQueimadaSelect" required class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                <option value="Terreno baldio urbano">Terreno baldio urbano</option>
+                <option value="Queima de lixo doméstico">Queima de lixo doméstico</option>
+                <option value="Margem de rodovia / acesso">Margem de rodovia / acesso</option>
+                <option value="Pastagem / Área rural próxima">Pastagem / Área rural próxima</option>
+                <option value="Área de mata / preservação">Área de mata / preservação</option>
+                <option value="Outro tipo de foco">Outro tipo de ocorrência</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="intensidadeSelect" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+                Intensidade da Fumaça *
+              </label>
+              <select id="intensidadeSelect" required class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                <option value="Crítica">🚨 Crítica (Asfixiante / baixa visibilidade)</option>
+                <option value="Densa" selected>🔥 Densa (Odor forte / fumaça escura)</option>
+                <option value="Moderada">💨 Moderada (Visível a distância)</option>
+                <option value="Leve">🌱 Leve (Pequena coluna de fumaça)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="proximidadeSelect" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+                Proximidade de Casas / Escolas *
+              </label>
+              <select id="proximidadeSelect" required class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors">
+                <option value="Menos de 100m">Menos de 100m (Risco imediato)</option>
+                <option value="Entre 100m e 500m" selected>Entre 100m e 500m</option>
+                <option value="Mais de 500m">Mais de 500m (Área isolada)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Linha 4: Data/Hora e Descrição -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div>
+              <label for="dataHoraInput" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+                Data e Horário Observado *
+              </label>
+              <input type="datetime-local" id="dataHoraInput" required class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="descricaoInput" class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+                Descrição do Foco / Detalhes Observados *
+              </label>
+              <textarea id="descricaoInput" rows="2" required placeholder="Descreva se o fogo está se espalhando, direção do vento, presença de faíscas ou riscos..." class="w-full bg-[#08110e] border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"></textarea>
+            </div>
+          </div>
+
+          <!-- Linha 5: Foto Opcional e Privacidade -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+            <div>
+              <label class="block text-xs font-semibold uppercase tracking-wider text-gray-300 mb-1.5">
+                Fotografia da Ocorrência (Opcional - Tirada com Segurança)
+              </label>
+              <input type="file" id="fotoInput" accept="image/*" class="w-full text-xs text-gray-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-950 file:text-emerald-300 hover:file:bg-emerald-900 cursor-pointer">
+              
+              <!-- Container de preview da foto -->
+              <div id="foto-preview-container" class="mt-3 hidden">
+                <p class="text-[11px] text-gray-400 mb-1">Prévia da imagem selecionada:</p>
+                <img id="foto-preview-img" src="" alt="Prévia da foto" class="h-24 w-auto rounded-lg border border-gray-700 object-cover">
+              </div>
+            </div>
+
+            <div class="flex flex-col justify-center space-y-2">
+              <div class="flex items-start gap-2.5">
+                <input type="checkbox" id="checkLgpd" required checked class="mt-1 rounded bg-black border-gray-700 text-emerald-600 focus:ring-emerald-500">
+                <label for="checkLgpd" class="text-xs text-gray-400 leading-normal">
+                  Declaro que as informações são um relato voluntário de boa-fé e estou ciente de que dados pessoais são protegidos pela LGPD, sem exposição indevida.
+                </label>
+              </div>
+              <p class="text-[11px] text-gray-500">
+                🔒 Seus registros são identificados por protocolo anônimo público (ex: FZ-RO-8421).
+              </p>
+            </div>
+          </div>
+
+          <!-- Botão de Envio -->
+          <div class="pt-4 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span class="text-xs text-gray-400">
+              * Todos os campos essenciais possuem validação automática.
+            </span>
+            <button type="submit" class="w-full sm:w-auto btn-fire px-8 py-3.5 rounded-xl bg-gradient-to-r from-orange-600 via-amber-600 to-orange-600 text-white font-bold text-sm shadow-xl shadow-orange-600/30 flex items-center justify-center gap-2">
+              <span>🚀</span> Enviar Registro ao FogoZero
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= MAPA INTERATIVO ================= -->
+  <section id="mapa" class="py-16 bg-[#09110f] border-b border-emerald-950/60">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8">
+
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        <div>
+          <span class="badge-tag bg-emerald-950/80 text-emerald-400 border border-emerald-700/60 mb-2">
+            🗺️ Mapeamento Espacial Comunitário
+          </span>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Mapa Interativo de Queimadas em Rondônia
+          </h2>
+          <p class="text-sm text-gray-400 mt-1">
+            Visualização dinâmica de ocorrências cadastradas pela população e focos sob monitoramento.
+          </p>
+        </div>
+
+        <!-- Filtros do Mapa -->
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-1.5 text-xs text-gray-300">
+            <span>Filtro Fumaça:</span>
+            <select id="filtro-mapa-intensidade" class="bg-[#0f1c18] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
+              <option value="todas">Todas as Intensidades</option>
+              <option value="Crítica">🚨 Crítica</option>
+              <option value="Densa">🔥 Densa</option>
+              <option value="Moderada">💨 Moderada</option>
+              <option value="Leve">🌱 Leve</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-1.5 text-xs text-gray-300">
+            <span>Município:</span>
+            <select id="filtro-mapa-municipio" class="bg-[#0f1c18] border border-gray-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none">
+              <option value="todos">Todos os Municípios</option>
+              <option value="Porto Velho">Porto Velho</option>
+              <option value="Ariquemes">Ariquemes</option>
+              <option value="Ji-Paraná">Ji-Paraná</option>
+              <option value="Cacoal">Cacoal</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Container do Mapa -->
+      <div class="glass-panel p-2 rounded-2xl border border-emerald-800/60 shadow-2xl overflow-hidden relative">
+        <div id="map"></div>
+
+        <!-- Legenda Flutuante do Mapa -->
+        <div class="absolute bottom-6 left-6 z-[400] glass-panel p-3.5 rounded-xl border border-gray-700/80 text-xs shadow-xl space-y-1.5 max-w-[240px]">
+          <p class="font-bold text-gray-200 text-[11px] uppercase tracking-wider mb-1">Legenda de Severidade:</p>
+          <div class="flex items-center gap-2 text-gray-300">
+            <span class="w-3 h-3 rounded-full bg-red-600 border border-white"></span>
+            <span>Crítica (Risco Severo)</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-300">
+            <span class="w-3 h-3 rounded-full bg-orange-500 border border-white"></span>
+            <span>Densa (Forte Fumaça)</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-300">
+            <span class="w-3 h-3 rounded-full bg-yellow-400 border border-white"></span>
+            <span>Moderada (Em Dispersão)</span>
+          </div>
+          <div class="flex items-center gap-2 text-gray-300">
+            <span class="w-3 h-3 rounded-full bg-emerald-500 border border-white"></span>
+            <span>Leve / Em Resolução</span>
+          </div>
+          <div class="pt-1.5 border-t border-gray-700 text-[10px] text-gray-400">
+            Clique no mapa para marcar novas coordenadas no formulário!
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= ÚLTIMOS RELATOS DA COMUNIDADE ================= -->
+  <section class="py-16 bg-[#0b1311] border-b border-emerald-950/60">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8">
+
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+        <div>
+          <span class="badge-tag bg-emerald-950/80 text-emerald-400 border border-emerald-700/60 mb-2">
+            📢 Mobilização Cidadã
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Últimos Relatos Registrados
+          </h2>
+          <p class="text-xs sm:text-sm text-gray-400 mt-1">
+            Transparência comunitária com protocolos e status de verificação.
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="exportarRelatosCSV()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-xs font-semibold transition-colors">
+            <span>📥</span> Exportar CSV
+          </button>
+          <button onclick="exportarRelatosJSON()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-900/80 hover:bg-gray-800 text-gray-300 border border-gray-700 text-xs font-semibold transition-colors">
+            <span>💾</span> JSON
+          </button>
+          <a href="#registro" class="text-xs text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1">
+            + Adicionar seu relato
+          </a>
+        </div>
+      </div>
+
+      <!-- Barra de Filtros e Busca de Relatos -->
+      <div class="glass-panel p-3.5 rounded-xl border border-gray-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div class="relative w-full sm:w-72">
+          <input type="text" id="busca-feed-input" placeholder="Buscar por bairro, município ou tipo..." oninput="filtrarFeedRelatos()" class="w-full bg-[#08110e] border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500">
+          <span class="absolute left-2.5 top-2.5 text-gray-500">🔍</span>
+        </div>
+
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+          <span class="text-gray-400 text-xs">Status:</span>
+          <select id="filtro-feed-status" onchange="filtrarFeedRelatos()" class="bg-[#08110e] border border-gray-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <option value="todos">Todos os Status</option>
+            <option value="Em Análise">Em Análise</option>
+            <option value="Verificado pela Comunidade">Verificado pela Comunidade</option>
+            <option value="Encaminhado aos Bombeiros">Encaminhado aos Bombeiros</option>
+            <option value="Resolvido">Resolvido</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Feed Container (Alimentado pelo app.js) -->
+      <div id="reports-feed-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Inserido dinamicamente -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= DADOS E ESTATÍSTICAS (INPE + CENTELHA) ================= -->
+  <section id="estatisticas" class="py-16 bg-[#091410] border-b border-emerald-950/60">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8">
+
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="badge-tag bg-blue-950/80 text-blue-400 border border-blue-700/60 mb-2">
+          🔬 Evidências Científicas & Estatísticas Oficiais
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Dados do INPE & Análise de Queimadas em Rondônia
+        </h2>
+        <p class="text-sm text-gray-400 mt-2">
+          Conforme demonstrado na Proposta Centelha 3 pela estudante Isadora Queiroz, os dados do Instituto Nacional de Pesquisas Espaciais (INPE) e da Prefeitura de Porto Velho comprovam a dinâmica das queimadas e a necessidade de monitoramento local contínuo.
+        </p>
+      </div>
+
+      <!-- Grid de Gráficos -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        
+        <!-- Gráfico 1: Comparativo Oficial -->
+        <div class="lg:col-span-7 glass-panel p-6 rounded-2xl border border-gray-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <span>📉</span> Comparativo Histórico de Focos (INPE)
+              </h3>
+              <span class="text-[11px] bg-emerald-950 text-emerald-300 border border-emerald-800 px-2 py-0.5 rounded">
+                Dados Oficiais
+              </span>
+            </div>
+            <p class="text-xs text-gray-400 mb-6">
+              Variação de focos em Rondônia (Junho/2024 vs Junho/2025) e redução de 79,2% em Porto Velho (Jan-Maio 2025 vs 2026).
+            </p>
+          </div>
+
+          <div class="h-64 sm:h-72 w-full">
+            <canvas id="chartComparativo"></canvas>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-gray-800/80 text-[11px] text-gray-400 flex items-center justify-between">
+            <span>Fonte: INPE (Programa Queimadas) & Prefeitura de Porto Velho</span>
+            <span class="text-emerald-400 font-semibold">-79,2% de redução recente</span>
+          </div>
+        </div>
+
+        <!-- Gráfico 2: Tipos de Queimadas Comunitárias -->
+        <div class="lg:col-span-5 glass-panel p-6 rounded-2xl border border-gray-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-white text-base flex items-center gap-2">
+                <span>📊</span> Ocorrências por Tipo Local
+              </h3>
+              <span class="text-[11px] bg-orange-950 text-orange-300 border border-orange-800 px-2 py-0.5 rounded">
+                Base FogoZero
+              </span>
+            </div>
+            <p class="text-xs text-gray-400 mb-4">
+              Distribuição dos relatos comunitários: terrenos baldios e queima de lixo representam a maior parte dos chamados urbanos.
+            </p>
+          </div>
+
+          <div class="h-64 w-full flex items-center justify-center">
+            <canvas id="chartCategorias"></canvas>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-gray-800/80 text-[11px] text-gray-400 text-center">
+            Atualizado automaticamente com novos registros comunitários
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Citação e Fontes Oficiais -->
+      <div class="mt-8 p-4 rounded-xl bg-black/40 border border-gray-800/80 text-xs text-gray-400 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400 font-bold">Fontes Oficiais Consultadas no Projeto:</span>
+          <span>Instituto Nacional de Pesquisas Espaciais (INPE) • Dados Abertos Programa Queimadas • Prefeitura Municipal de Porto Velho</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="https://queimadas.dgi.inpe.br/queimadas/portal" target="_blank" rel="noopener noreferrer" class="text-emerald-400 hover:underline">
+            Portal INPE ➔
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= VÍDEO PITCH (OBRIGATÓRIO CENTELHA 3) ================= -->
+  <section id="pitch" class="py-16 bg-[#0c1613] border-b border-emerald-950/60">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8">
+
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="badge-tag bg-red-950/80 text-red-400 border border-red-700/60 mb-2">
+          🎬 Pitch de Apresentação da Ideia
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Vídeo Pitch Oficial – FogoZero
+        </h2>
+        <p class="text-sm text-gray-400 mt-2">
+          Conforme exigido no Simulado Centelha 3 Rondônia, o vídeo pitch possui até 3 minutos e sintetiza o problema, a solução, a inovação, o mercado, o impacto e a capacidade de execução.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <!-- Player de Vídeo -->
+        <div class="lg:col-span-7">
+          <div class="glass-panel p-3 rounded-2xl border border-red-900/60 shadow-2xl overflow-hidden">
+            <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-black flex items-center justify-center">
+              <iframe 
+                class="w-full h-full"
+                src="https://www.youtube-nocookie.com/embed/vBwcouGCj0k?rel=0" 
+                title="Vídeo Pitch - FogoZero Centelha 3 Rondônia - Isadora Cristina" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+              </iframe>
+            </div>
+
+            <div class="p-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="text-red-500 font-bold text-sm">▶</span>
+                <span class="text-gray-200 font-semibold">Pitch: FogoZero - Queimadas em Rondônia</span>
+              </div>
+              <a href="https://youtu.be/vBwcouGCj0k" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-red-900/80 hover:bg-red-800 text-red-200 font-semibold flex items-center gap-1 transition-colors">
+                Abrir no YouTube ➔
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roteiro do Pitch e Critérios -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="glass-panel p-6 rounded-2xl border border-emerald-900/60">
+            <h3 class="font-bold text-white text-base mb-3 flex items-center gap-2">
+              <span>⏱️</span> Roteiro do Pitch (3 Minutos)
+            </h3>
+
+            <div class="space-y-2.5 text-xs">
+              <div class="p-2.5 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-between">
+                <div>
+                  <strong class="text-amber-400">0:00 - 0:30 • Problema</strong>
+                  <p class="text-gray-400 text-[11px]">Queimadas em RO, falta de dados locais e saúde.</p>
+                </div>
+                <span class="font-mono text-gray-500">30s</span>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-between">
+                <div>
+                  <strong class="text-emerald-400">0:30 - 1:15 • Solução FogoZero</strong>
+                  <p class="text-gray-400 text-[11px]">Web app, formulário acessível e mapa comunitário.</p>
+                </div>
+                <span class="font-mono text-gray-500">45s</span>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-between">
+                <div>
+                  <strong class="text-orange-400">1:15 - 1:50 • Inovação</strong>
+                  <p class="text-gray-400 text-[11px]">Diferencial vs satélites: foco local e relatos humanos.</p>
+                </div>
+                <span class="font-mono text-gray-500">35s</span>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-between">
+                <div>
+                  <strong class="text-blue-400">1:50 - 2:20 • Mercado</strong>
+                  <p class="text-gray-400 text-[11px]">Moradores, escolas, secretarias e defesa civil.</p>
+                </div>
+                <span class="font-mono text-gray-500">30s</span>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-between">
+                <div>
+                  <strong class="text-purple-400">2:20 - 2:40 • Impacto</strong>
+                  <p class="text-gray-400 text-[11px]">Qualidade do ar, agilidade e mitigação de riscos.</p>
+                </div>
+                <span class="font-mono text-gray-500">20s</span>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-black/40 border border-gray-800 flex items-center justify-between">
+                <div>
+                  <strong class="text-teal-400">2:40 - 3:00 • Execução & Fechamento</strong>
+                  <p class="text-gray-400 text-[11px]">Formação técnica em informática e próximos passos.</p>
+                </div>
+                <span class="font-mono text-gray-500">20s</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= DETALHAMENTO DA PROPOSTA CENTELHA 3 ================= -->
+  <section id="projeto" class="py-16 bg-[#09110f] border-b border-emerald-950/60">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8">
+
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="badge-tag bg-emerald-950/80 text-emerald-400 border border-emerald-700/60 mb-2">
+          📋 Dossiê da Proposta Acadêmica
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Simulado Centelha 3 Rondônia – Fase 1
+        </h2>
+        <p class="text-sm text-gray-400 mt-2">
+          Estrutura técnica e analítica fundamentada no Edital nº 03/2026 (FAPERO / FINEP / CERTI).
+        </p>
+      </div>
+
+      <!-- Grid com os 5 Pilares Centelha -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        <!-- Card 1: Identificação -->
+        <div class="glass-panel p-6 rounded-2xl border border-emerald-900/60 hover:border-emerald-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-emerald-900/50 text-emerald-400 flex items-center justify-center text-lg mb-4">
+            🆔
+          </div>
+          <h3 class="font-bold text-white text-base mb-2">1. Identificação da Proposta</h3>
+          <ul class="text-xs text-gray-300 space-y-2">
+            <li><strong>Estudante:</strong> Isadora Cristina Ferreira Queiroz</li>
+            <li><strong>Turma:</strong> 3°B de Informática</li>
+            <li><strong>Nome do Projeto:</strong> FogoZero – Sistema Inteligente de Registro e Monitoramento de Queimadas</li>
+            <li><strong>Tecnologias:</strong> Desenvolvimento Web, Banco de Dados, APIs, Geolocalização, Formulários e futura IA.</li>
+            <li><strong>Setor:</strong> Meio Ambiente, Tecnologia e Gestão Ambiental.</li>
+          </ul>
+        </div>
+
+        <!-- Card 2: Problema e Mercado -->
+        <div class="glass-panel p-6 rounded-2xl border border-emerald-900/60 hover:border-emerald-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-amber-900/50 text-amber-400 flex items-center justify-center text-lg mb-4">
+            🎯
+          </div>
+          <h3 class="font-bold text-white text-base mb-2">2. Problema e Oportunidade</h3>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Dificuldade de reunir informações de queimadas locais em tempo real. Relatos ficam dispersos na comunidade sem um banco de dados centralizado. Há demanda latente por uma ferramenta digital simples que permita ao cidadão registrar ocorrências pelo celular e apoiar escolas, moradores e órgãos ambientais.
+          </p>
+        </div>
+
+        <!-- Card 3: Solução e Diferencial -->
+        <div class="glass-panel p-6 rounded-2xl border border-emerald-900/60 hover:border-emerald-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-orange-900/50 text-orange-400 flex items-center justify-center text-lg mb-4">
+            💡
+          </div>
+          <h3 class="font-bold text-white text-base mb-2">3. Solução & Diferencial Inovador</h3>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            O FogoZero não substitui satélites (como o INPE), mas atua como <strong>camada complementar de hiperproximidade</strong>: coleta fotografias, fumaça observada, proximidade de moradias e relato comunitário direto, com apresentação espacial em mapa interativo.
+          </p>
+        </div>
+
+        <!-- Card 4: Impacto Socioambiental -->
+        <div class="glass-panel p-6 rounded-2xl border border-emerald-900/60 hover:border-emerald-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-purple-900/50 text-purple-400 flex items-center justify-center text-lg mb-4">
+            🌱
+          </div>
+          <h3 class="font-bold text-white text-base mb-2">4. Impacto & Mitigação de Riscos</h3>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            <strong>Benefícios:</strong> Redução do tempo de reação, conscientização comunitária e alertas de fumaça.<br>
+            <strong>Mitigação de Riscos:</strong> Avisos ostensivos de segurança física (nunca se aproximar das chamas), conformidade com LGPD e moderação contra relatos falsos.
+          </p>
+        </div>
+
+        <!-- Card 5: Capacidade de Execução -->
+        <div class="glass-panel p-6 rounded-2xl border border-emerald-900/60 hover:border-emerald-500/50 transition-all">
+          <div class="w-10 h-10 rounded-xl bg-blue-900/50 text-blue-400 flex items-center justify-center text-lg mb-4">
+            🛠️
+          </div>
+          <h3 class="font-bold text-white text-base mb-2">5. Capacidade de Execução</h3>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Formação técnica no 3º ano de Informática, com domínio de desenvolvimento web, banco de dados e formulários. Plano claro de aprofundamento em APIs de geolocalização e integração de dados públicos com apoio de professores e especialistas.
+          </p>
+        </div>
+
+        <!-- Card 6: Fórmula de Avaliação Centelha -->
+        <div class="glass-panel p-6 rounded-2xl border border-emerald-900/60 hover:border-emerald-500/50 transition-all flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-teal-900/50 text-teal-400 flex items-center justify-center text-lg mb-4">
+              ⚖️
+            </div>
+            <h3 class="font-bold text-white text-base mb-2">6. Critérios de Avaliação (Fase 1)</h3>
+            <div class="p-2.5 rounded-lg bg-black/50 border border-gray-800 text-[11px] font-mono text-emerald-300 mb-2">
+              Nota = (2 × S + M + E + I) ÷ 5
+            </div>
+            <p class="text-[11px] text-gray-400">
+              Solução (peso 2) • Mercado (peso 1) • Impacto (peso 1) • Capacidade de Execução (peso 1).
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-gray-800">
+            <a href="formulario.html" target="_blank" class="w-full text-center inline-block px-4 py-2 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-700/60 hover:bg-emerald-900 text-xs font-semibold transition-colors">
+              Abrir Formulário Oficial Preenchido (.doc) ➔
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= GUIA DE SAÚDE, PREVENÇÃO E CONTATOS ================= -->
+  <section id="prevencao" class="py-16 bg-[#0b1311] border-b border-emerald-950/60">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8">
+
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="badge-tag bg-emerald-950/80 text-emerald-400 border border-emerald-700/60 mb-2">
+          🩺 Guia Comunitário de Saúde & Emergências
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Como se Proteger da Fumaça e Evitar Queimadas
+        </h2>
+        <p class="text-sm text-gray-400 mt-2">
+          Orientações essenciais para a população de Rondônia durante os períodos de seca e concentração de fumaça.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Card 1: Cuidados com a Saúde -->
+        <div class="glass-panel p-6 rounded-2xl border border-gray-800 space-y-3">
+          <div class="text-2xl">🫁</div>
+          <h3 class="font-bold text-white text-base">Proteção Respiratória</h3>
+          <ul class="text-xs text-gray-300 space-y-2 list-disc list-inside">
+            <li>Utilize máscaras PFF2/N95 em dias de fumaça densa com alta concentração de material particulado.</li>
+            <li>Mantenha janelas e portas fechadas durante os horários de maior concentração.</li>
+            <li>Umidifique os cômodos com bacias de água ou toalhas úmidas.</li>
+            <li>Aumente a ingestão de líquidos para hidratar as vias respiratórias.</li>
+            <li>Atenção redobrada com crianças, idosos e pessoas com asma ou bronquite.</li>
+          </ul>
+        </div>
+
+        <!-- Card 2: Prevenção Ativa -->
+        <div class="glass-panel p-6 rounded-2xl border border-gray-800 space-y-3">
+          <div class="text-2xl">🚫</div>
+          <h3 class="font-bold text-white text-base">Prevenção de Focos</h3>
+          <ul class="text-xs text-gray-300 space-y-2 list-disc list-inside">
+            <li><strong>Não queime lixo doméstico ou folhas:</strong> além de crime ambiental, a fumaça intoxica os vizinhos.</li>
+            <li>Mantenha terrenos limpos através de roçagem, sem o uso do fogo.</li>
+            <li>Nunca arremesse bitucas de cigarro acesas em margens de rodovias ou vegetação seca.</li>
+            <li>Em propriedades rurais, faça aceiros adequados ao redor de áreas produtivas.</li>
+            <li>Conscientize vizinhos e participe de grupos comunitários de vigilância.</li>
+          </ul>
+        </div>
+
+        <!-- Card 3: Telefones de Emergência em Rondônia -->
+        <div class="glass-panel p-6 rounded-2xl border border-gray-800 space-y-4">
+          <div class="text-2xl">📞</div>
+          <h3 class="font-bold text-white text-base">Canais de Emergência (RO)</h3>
+          
+          <div class="space-y-2.5 text-xs">
+            <a href="tel:193" class="p-2.5 rounded-xl bg-red-950/70 border border-red-700/60 flex items-center justify-between hover:bg-red-900/80 transition-colors">
+              <div>
+                <strong class="text-red-300">193 • Corpo de Bombeiros Militar</strong>
+                <p class="text-[11px] text-gray-400">Combate a incêndios e resgate</p>
+              </div>
+              <span class="text-sm font-bold text-red-400">Ligar ➔</span>
+            </a>
+
+            <a href="tel:199" class="p-2.5 rounded-xl bg-orange-950/70 border border-orange-700/60 flex items-center justify-between hover:bg-orange-900/80 transition-colors">
+              <div>
+                <strong class="text-orange-300">199 • Defesa Civil</strong>
+                <p class="text-[11px] text-gray-400">Alertas de risco e desastres</p>
+              </div>
+              <span class="text-sm font-bold text-orange-400">Ligar ➔</span>
+            </a>
+
+            <a href="tel:08006471150" class="p-2.5 rounded-xl bg-emerald-950/70 border border-emerald-700/60 flex items-center justify-between hover:bg-emerald-900/80 transition-colors">
+              <div>
+                <strong class="text-emerald-300">0800 647 1150 • SEDAM RO</strong>
+                <p class="text-[11px] text-gray-400">Denúncias de crimes ambientais</p>
+              </div>
+              <span class="text-sm font-bold text-emerald-400">Ligar ➔</span>
+            </a>
+
+            <a href="tel:190" class="p-2.5 rounded-xl bg-blue-950/70 border border-blue-700/60 flex items-center justify-between hover:bg-blue-900/80 transition-colors">
+              <div>
+                <strong class="text-blue-300">190 • Polícia Militar / Batalhão Ambiental</strong>
+                <p class="text-[11px] text-gray-400">Fiscalização imediata de queimadas ilegais</p>
+              </div>
+              <span class="text-sm font-bold text-blue-400">Ligar ➔</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="mt-auto py-12 bg-[#060c0a] border-t border-emerald-950/80 text-gray-400 text-xs">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8 space-y-8">
+      
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-emerald-600 flex items-center justify-center text-white text-lg">
+            🔥
+          </div>
+          <div>
+            <span class="font-extrabold text-white text-base">FogoZero</span>
+            <p class="text-[11px] text-gray-500">Sistema Inteligente de Registro e Monitoramento de Queimadas</p>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 text-xs">
+          <a href="#inicio" class="hover:text-emerald-400">Início</a>
+          <a href="#registro" class="hover:text-emerald-400">Registrar Foco</a>
+          <a href="#mapa" class="hover:text-emerald-400">Mapa</a>
+          <a href="#estatisticas" class="hover:text-emerald-400">Dados INPE</a>
+          <a href="#pitch" class="hover:text-emerald-400">Vídeo Pitch</a>
+          <a href="formulario.html" target="_blank" class="text-emerald-400 font-semibold hover:underline">Formulário Completo (.doc)</a>
+        </div>
+      </div>
+
+      <div class="pt-6 border-t border-gray-900/80 grid grid-cols-1 md:grid-cols-2 gap-4 text-[11px] text-gray-500">
+        <div>
+          <p>
+            <strong>Projeto Acadêmico:</strong> Elaborado por <strong>Isadora Cristina Ferreira Queiroz</strong> (3°B de Informática).
+          </p>
+          <p class="mt-1">
+            Atividade simulada da Fase 1 (Ideias Inovadoras) do Programa Centelha 3 Rondônia - FAPERO / FINEP / CERTI.
+          </p>
+        </div>
+        <div class="md:text-right">
+          <p>
+            Tecnologia a serviço da preservação ambiental e da qualidade de vida em Rondônia.
+          </p>
+          <p class="mt-1">
+            © 2026 FogoZero • Todos os direitos reservados.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ================= MODAL DE CONFIRMAÇÃO DE PROTOCOLO ================= -->
+  <div id="modal-confirmacao" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-panel max-w-md w-full p-6 rounded-2xl border border-emerald-500/50 shadow-2xl relative animate-scaleUp">
+      <div class="text-center space-y-3">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-900/50 border border-emerald-500/60 text-emerald-400 flex items-center justify-center text-3xl">
+          ✅
+        </div>
+        <h3 class="text-xl font-black text-white">Relato Registrado com Sucesso!</h3>
+        <p class="text-xs text-gray-300">
+          Sua contribuição já está registrada no sistema FogoZero e visível no mapa de monitoramento comunitário.
+        </p>
+
+        <div class="p-3.5 rounded-xl bg-black/60 border border-emerald-800/80 my-3">
+          <span class="text-[10px] uppercase font-mono tracking-wider text-gray-400 block">Número de Protocolo:</span>
+          <span id="modal-proto-codigo" class="text-xl font-mono font-bold text-amber-400">FZ-RO-0000</span>
+        </div>
+
+        <div id="modal-resumo-texto" class="text-xs text-gray-300 p-3 rounded-lg bg-emerald-950/30 border border-emerald-900/50 text-left">
+          <!-- Detalhes do relato -->
+        </div>
+
+        <div class="pt-3">
+          <button onclick="fecharModalConfirmacao()" class="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-lg">
+            Concluir e Ver no Mapa
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Script da Aplicação -->
+  <script src="app.js"></script>
+</body>
+</html>
